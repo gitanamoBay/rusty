@@ -1,0 +1,8 @@
+[package]
+name = "rustyapp"
+version = "0.1.0"
+authors = ["grant lodge <grant.lodge@nesltd.co.uk>"]
+[dependencies]
+rustc-serialize = "*"
+docopt = "*"
+docopt_macros = "*"
