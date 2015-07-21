@@ -29,8 +29,6 @@ Options:
 //    rusty remove <id>
 //    rusty --help
 
-#[derive(Debug)
-t
 
 #[derive(Debug)]
 enum Command{
