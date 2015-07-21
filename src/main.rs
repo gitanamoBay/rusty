@@ -28,11 +28,18 @@ fn main() {
     
     println!("{:#?}", args);
 
-
     if(args.cmd_add)
     {
        println!("{}",args.arg_name);
-    } 
+    
+    }
+    
+    let ent = Entry{
+        name: "entry".to_string(),
+        id: 1,
+        status: "".to_string()
+    };
+    
    
     //if(args.cmd_remove)
     //{
