@@ -42,8 +42,9 @@ fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
       
     if(args.cmd_add)
+    {
         println!("{}",args.arg_thing);
-    
+    }
     
     if(args.cmd_remove)
     {
