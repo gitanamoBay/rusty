@@ -1,13 +1,19 @@
-#![feature(plugin)]
+#![feature(path_ext, plugin)]
 #![plugin(docopt_macros)]
-extern crate rustc_serialize;
+
 extern crate docopt;
+extern crate rustc_serialize;
+
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+
+use docopt::Docopt;
+use rustc_serialize::json;
+
+use entry::Entry;
 
 mod entry;
-
-use rustc_serialize::json;
-use docopt::Docopt;
-use entry::Entry;
 
 docopt!(Args derive Debug, "
 rusty app is a simple note keeping app
@@ -26,20 +32,44 @@ Options:
 fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
     
-    println!("{:#?}", args);
-
-    if(args.cmd_add)
-    {
-       println!("{}",args.arg_name);
-    
-    }
-    
-    let ent = Entry{
-        name: "entry".to_string(),
-        id: 1,
-        status: "".to_string()
+    let filepath = Path::new("foo.txt");
+    let mut file = if(filepath.exists()) {
+        match File::open(filepath) {
+            Ok(file) => file,
+            Err(why) => panic!("failed to open file {}",why)
+        }
+    } else {
+        match File::create("foo.txt") {
+            Ok(file) => file,
+            Err(why) => panic!("it couldn't make files {}",why),
+        }
     };
     
+    if (args.cmd_add) {
+        //we love egyptian braces.
+        
+    }
+
+    let ent = Entry::new(1,"","");
+
+    let encoded = json::encode(&ent).unwrap();
+    
+    
+    match file.write_all(encoded.as_bytes()) {
+        Ok(_) => println!("worked."),
+        Err(why) => panic!("nicht sehr guht"),
+    }
+    
+    
+    
+
+   // println!("{:#?}", args);
+
+    //if(args.cmd_add)
+    //{
+     //  println!("{}",args.arg_name);
+    
+   // }    
    
     //if(args.cmd_remove)
     //{
@@ -51,5 +81,6 @@ fn main() {
      
 }
 
-
+fn add() {
+}
 
