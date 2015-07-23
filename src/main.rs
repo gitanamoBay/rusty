@@ -5,6 +5,7 @@ extern crate docopt;
 extern crate rustc_serialize;
 
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -33,35 +34,31 @@ fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
     
     let filepath = Path::new("foo.txt");
-    let mut file = if(filepath.exists()) {
-        match File::open(filepath) {
+    let mut file = if filepath.exists() {
+        match OpenOptions::new().read(true).write(true).open(filepath) {
             Ok(file) => file,
             Err(why) => panic!("failed to open file {}",why)
         }
     } else {
-        match File::create("foo.txt") {
+        match File::create(filepath) {
             Ok(file) => file,
             Err(why) => panic!("it couldn't make files {}",why),
         }
     };
     
-    if (args.cmd_add) {
+    if args.cmd_add {
         //we love egyptian braces.
         
     }
 
-    let ent = Entry::new(1,"","");
+    let ent = Entry::new(1,"test","test");
 
     let encoded = json::encode(&ent).unwrap();
     
-    
     match file.write_all(encoded.as_bytes()) {
         Ok(_) => println!("worked."),
-        Err(why) => panic!("nicht sehr guht"),
+        Err(why) => panic!("errored on write:  {}",why),
     }
-    
-    
-    
 
    // println!("{:#?}", args);
 
@@ -79,8 +76,5 @@ fn main() {
 
 //    let decoded: Entry = json::decode(&encoded[..]).unwrap();
      
-}
-
-fn add() {
 }
 
