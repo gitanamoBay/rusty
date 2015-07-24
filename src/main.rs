@@ -7,6 +7,7 @@ extern crate rustc_serialize;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
+use std::io::SeekFrom;
 use std::path::Path;
 
 use docopt::Docopt;
@@ -35,6 +36,8 @@ fn main() {
     
     println!("{:#?}", args);
     let filepath = Path::new("rustynotes.txt");
+    let swp = Path::new("rn.swp");
+
     let mut file = if filepath.exists() {
         match OpenOptions::new().read(true).write(true).open(filepath) {
             Ok(file) => file,
@@ -48,17 +51,21 @@ fn main() {
     };
 
     let mut stringdata = String::new();
-    match file.read_to_string(&mut stringdata) {
-        Ok(_) => println!("read data"),
-        Err(why) => println!("couldn't read contents {}",why),
-    };
+
+    if let Err(why) = file.read_to_string(&mut stringdata) {
+        println!("couldn't read contents {}",why);
+    }
 
     let mut entries:Vec<Entry> = if stringdata.len() != 0 {
         json::decode(&stringdata).unwrap()
     } else {
         Vec::new()
     };
-    
+     
+    if let Err(why) = file.seek(SeekFrom::Start(0)) {
+        panic!("couldn't clear file {}",why);
+    }       
+
     if args.cmd_add {
         //we love egyptian braces.
         let status = if args.arg_status.len()==0 {
@@ -72,27 +79,25 @@ fn main() {
         entries.push(newEnt);
 
         let encoded = json::encode(&entries).unwrap();
-         
+        
+        //match File::create(swp) {
+        //    Ok(file) => file,
+        //    Err(why) => panic!("it couldn't make files {}",why),
+        //}
+
         match file.write_all(encoded.as_bytes()) {
             Ok(_) => println!("worked."),
             Err(why) => panic!("errored on write:  {}",why),
         }
     }
 
-
     //if(args.cmd_add)
     //{
-     //  println!("{}",args.arg_name);
-    
-   // }    
+    //  println!("{}",args.arg_name);
+    //}    
    
     //if(args.cmd_remove)
     //{
     //}
-        
-  //  let encoded = json::encode(&ent).unwrap();
-
-//    let decoded: Entry = json::decode(&encoded[..]).unwrap();
-     
 }
 
