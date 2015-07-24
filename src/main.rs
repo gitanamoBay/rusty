@@ -34,7 +34,7 @@ fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
     
     println!("{:#?}", args);
-    let filepath = Path::new("itsbroke.txt");
+    let filepath = Path::new("rustynotes.txt");
     let mut file = if filepath.exists() {
         match OpenOptions::new().read(true).write(true).open(filepath) {
             Ok(file) => file,
@@ -46,25 +46,32 @@ fn main() {
             Err(why) => panic!("it couldn't make files {}",why),
         }
     };
+
+    let mut stringdata = String::new();
+    match file.read_to_string(&mut stringdata) {
+        Ok(_) => println!("read data"),
+        Err(why) => println!("couldn't read contents {}",why),
+    };
+
+    let mut entries:Vec<Entry> = if stringdata.len() != 0 {
+        json::decode(&stringdata).unwrap()
+    } else {
+        Vec::new()
+    };
     
     if args.cmd_add {
         //we love egyptian braces.
-        //let status = if (args.arg_status.is_empty()) {
-        //    "new" 
-        //} else {
-        //    args.arg_status
-        //};
+        let status = if args.arg_status.len()==0 {
+            "new".to_string()
+        } else {
+            args.arg_status.to_string()
+        };
 
+        let newEnt = Entry::new(3,&args.arg_name,&status);
 
-        let ent = Entry::new(1,"1","1");
-        let ent1 = Entry::new(2,"2","2");
-        let ent2 = Entry::new(3,"3","3");
+        entries.push(newEnt);
 
-        
-        //let mut v = vec![json::encode(&ent).unwrap(),json::encode(&ent1).unwrap(),json::encode(&ent2).unwrap()];
-        let mut v = vec![ent,ent1,ent2];
-        
-        let encoded = json::encode(&v).unwrap();
+        let encoded = json::encode(&entries).unwrap();
          
         match file.write_all(encoded.as_bytes()) {
             Ok(_) => println!("worked."),
