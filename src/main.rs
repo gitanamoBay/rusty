@@ -56,7 +56,7 @@ fn main() {
         println!("couldn't read contents {}",why);
     }
 
-    let mut entries:Vec<Entry> = if stringdata.len() != 0 {
+    let mut entries: Vec<Entry> = if stringdata.len() != 0 {
         json::decode(&stringdata).unwrap()
     } else {
         Vec::new()
@@ -67,37 +67,48 @@ fn main() {
     }       
 
     if args.cmd_add {
-        //we love egyptian braces.
         let status = if args.arg_status.len()==0 {
             "new".to_string()
         } else {
             args.arg_status.to_string()
         };
+        
+        let mut done =false;
+        let mut value:u32 = 0;
+        let mut cindex = 0;
+        let mut holder: Vec<Entry> = Vec::new();
 
-        let newEnt = Entry::new(3,&args.arg_name,&status);
+        while(!done)
+        {
+            if cindex == entries.len() {
+                done = true;
+            } else {
+                if entries[cindex].id != value{
+                    done = true;
+                } else {
+                    value += 1;
+                    cindex += 1;
+                }
+            }
+        }
+
+        let newEnt = Entry::new(value,&args.arg_name,&status);
+
 
         entries.push(newEnt);
-
-        let encoded = json::encode(&entries).unwrap();
-        
-        //match File::create(swp) {
-        //    Ok(file) => file,
-        //    Err(why) => panic!("it couldn't make files {}",why),
-        //}
-
-        match file.write_all(encoded.as_bytes()) {
-            Ok(_) => println!("worked."),
-            Err(why) => panic!("errored on write:  {}",why),
-        }
     }
 
-    //if(args.cmd_add)
-    //{
-    //  println!("{}",args.arg_name);
-    //}    
-   
-    //if(args.cmd_remove)
-    //{
-    //}
+    if(args.cmd_remove)
+    {
+        
+    }
+    
+    
+    let encoded = json::encode(&entries).unwrap();
+    
+    match file.write_all(encoded.as_bytes()) {
+        Ok(_) => println!("worked."),
+        Err(why) => panic!("errored on write:  {}",why),
+    }
 }
 
