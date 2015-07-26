@@ -73,17 +73,17 @@ fn main() {
             args.arg_status.to_string()
         };
         
-        let mut done =false;
+        let mut done = false;
         let mut value:u32 = 0;
         let mut cindex = 0;
-        let mut holder: Vec<Entry> = Vec::new();
+        let mut holder:Vec<Entry> = Vec::new();
 
         while(!done)
         {
             if cindex == entries.len() {
                 done = true;
             } else {
-                if entries[cindex].id != value{
+               if entries[cindex].id != value{
                     done = true;
                 } else {
                     value += 1;
@@ -94,15 +94,21 @@ fn main() {
 
         let newEnt = Entry::new(value,&args.arg_name,&status);
 
-
         entries.push(newEnt);
     }
 
-    if(args.cmd_remove)
-    {
+    //if(args.cmd_remove)
+    //{
         
+    //     entries.pop(foundEnt);
+    //}
+    //
+    if(args.cmd_list)
+    {
+        for entry in entries.iter(){
+            println!("{:#?}",entry);
+        }
     }
-    
     
     let encoded = json::encode(&entries).unwrap();
     
