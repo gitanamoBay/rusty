@@ -106,7 +106,7 @@ fn main() {
     if(args.cmd_list)
     {
         for entry in entries.iter(){
-            println!("{:#?}",entry);
+            println!("{}",entry);
         }
     }
     
