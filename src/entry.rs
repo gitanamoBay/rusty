@@ -1,5 +1,7 @@
-use rustc_serialize::json;
 use std::fmt;
+
+use rustc_serialize::json;
+
 #[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct Entry {
     pub name: String,
