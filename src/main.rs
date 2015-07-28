@@ -7,9 +7,7 @@ extern crate rustc_serialize;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
-use std::io::SeekFrom;
 use std::path::Path;
-use std::collections::VecDeque;
 
 use docopt::Docopt;
 use rustc_serialize::json;
@@ -38,7 +36,7 @@ fn main() {
     let filepath = Path::new("rustynotes.txt");
 
     let mut file = if filepath.exists() {
-        match OpenOptions::new().read(true).write(true).open(filepath) {
+        match OpenOptions::new().read(true).open(filepath) {
             Ok(file) => file,
             Err(why) => panic!("failed to open file {}",why)
         }
@@ -54,16 +52,16 @@ fn main() {
     if let Err(why) = file.read_to_string(&mut stringdata) {
         println!("couldn't read contents {}",why);
     }
-
-    let mut entries: VecDeque<Entry> = if stringdata.len() != 0 {
+    
+    let mut entries: Vec<Entry> = if stringdata.len() != 0 {
         json::decode(&stringdata).unwrap()
     } else {
-        VecDeque::new()
+        Vec::new()
     };
      
-    if let Err(why) = file.seek(SeekFrom::Start(0)) {
-        panic!("couldn't clear file {}",why);
-    }       
+    //if let Err(why) = file.seek(SeekFrom::Start(0)) {
+    //    panic!("couldn't clear file {}",why);
+    //}       
 
     if args.cmd_add {
         let status = if args.arg_status.len()==0 {
@@ -75,44 +73,41 @@ fn main() {
         let mut done = false;
         let mut value:u32 = 0;
         let mut cindex = 0;
-        let mut holder:Vec<Entry> = Vec::new();
-
-        while(!done) {
+        
+        while !done {
             if cindex == entries.len() {
                 done = true;
             } else {
                if entries[cindex].id != value{
                     done = true;
                 } else {
-                    holder.push(entries.pop_front());
                     value += 1;
                     cindex += 1;
                 }
             }
         }
 
-        let newEnt = Entry::new(value,&args.arg_name,&status);
-
-        entries.push_front(newEnt);
-
-        done = false;
-
-        while(!done) {
-            done = holder.len() == 0;
-
-            if(!done){
-                entries.push_front(holder.pop());
-            }
-        }
+        let new_ent = Entry::new(value,&args.arg_name,&status);
+        
+        entries.insert(cindex,new_ent);
     }
 
-    //if(args.cmd_remove)
-    //{
-        
-    //     entries.pop(foundEnt);
-    //}
-    //
-    if(args.cmd_list)
+    if args.cmd_remove
+    {
+            let number: u32 = match args.arg_id.parse() {
+                Ok(n) => n,
+                Err(_) => panic!("error: second argument not an integer"),
+            }; 
+
+
+        match entries.binary_search_by(|probe| probe.id.cmp(&number)) {
+            Ok(found) => entries.remove(found),
+            Err(why) => panic!("id not found {}",why),
+        };
+    }
+    
+
+    if args.cmd_list
     {
         for entry in entries.iter(){
             println!("{}",entry);
@@ -120,9 +115,15 @@ fn main() {
     }
 
     let encoded = json::encode(&entries).unwrap();
-    
-    if let Err(why) = file.write_all(encoded.as_bytes()) {
-        panic!("errored on write:  {}",why);
+    match File::create(filepath) {
+        Ok(mut swap_file) => {
+            if let Err(why) = swap_file.write_all(encoded.as_bytes()) {
+                panic!("errored on write:  {}",why);
+            }
+        },
+        Err(why) => panic!("failed to open file {}",why)
     }
+
 }
+
 
