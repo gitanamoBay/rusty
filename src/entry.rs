@@ -21,6 +21,6 @@ impl Entry {
 
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "\n\n{0}\nStatus:{1} \nID:{2}", self.name,self.status,self.id)
+        write!(f, "{0}\nID:{2} Status:{1}\n", self.name,self.status,self.id)
     }
 }
