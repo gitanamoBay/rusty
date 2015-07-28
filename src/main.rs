@@ -60,7 +60,7 @@ fn main() {
     };
      
     if args.cmd_add {
-        let status = if args.arg_status.len()==0 {
+        let status = if args.arg_status.len() == 0 {
             "new".to_string()
         } else {
             args.arg_status.to_string()
