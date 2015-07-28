@@ -59,10 +59,6 @@ fn main() {
         Vec::new()
     };
      
-    //if let Err(why) = file.seek(SeekFrom::Start(0)) {
-    //    panic!("couldn't clear file {}",why);
-    //}       
-
     if args.cmd_add {
         let status = if args.arg_status.len()==0 {
             "new".to_string()
@@ -92,8 +88,7 @@ fn main() {
         entries.insert(cindex,new_ent);
     }
 
-    if args.cmd_remove
-    {
+    if args.cmd_remove || args.cmd_update {
             let number: u32 = match args.arg_id.parse() {
                 Ok(n) => n,
                 Err(_) => panic!("error: second argument not an integer"),
@@ -101,19 +96,24 @@ fn main() {
 
 
         match entries.binary_search_by(|probe| probe.id.cmp(&number)) {
-            Ok(found) => entries.remove(found),
+            Ok(found) => {
+                if args.cmd_remove{
+                    entries.remove(found);
+                } else {
+                    entries[found].status = args.arg_status;
+                }
+            },
             Err(why) => panic!("id not found {}",why),
         };
     }
-    
 
-    if args.cmd_list
-    {
+    if args.cmd_list {
         for entry in entries.iter(){
             println!("{}",entry);
         }
+        return;
     }
-
+    
     let encoded = json::encode(&entries).unwrap();
     match File::create(filepath) {
         Ok(mut swap_file) => {
@@ -123,7 +123,4 @@ fn main() {
         },
         Err(why) => panic!("failed to open file {}",why)
     }
-
 }
-
-
