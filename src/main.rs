@@ -47,7 +47,7 @@ fn main() {
         }
     };
 
-    let mut stringdata = String::new();
+    let mut stringdata = String::with_capacity(1024);
 
     if let Err(why) = file.read_to_string(&mut stringdata) {
         println!("couldn't read contents {}",why);
@@ -67,7 +67,7 @@ fn main() {
         };
         
         let mut done = false;
-        let mut value:u32 = 0;
+        let mut value = 0;
         let mut cindex = 0;
         
         while !done {
