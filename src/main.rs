@@ -9,6 +9,7 @@ use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::io::SeekFrom;
 use std::path::Path;
+use std::collections::VecDeque;
 
 use docopt::Docopt;
 use rustc_serialize::json;
@@ -54,10 +55,10 @@ fn main() {
         println!("couldn't read contents {}",why);
     }
 
-    let mut entries: Vec<Entry> = if stringdata.len() != 0 {
+    let mut entries: VecDeque<Entry> = if stringdata.len() != 0 {
         json::decode(&stringdata).unwrap()
     } else {
-        Vec::new()
+        VecDeque::new()
     };
      
     if let Err(why) = file.seek(SeekFrom::Start(0)) {
@@ -76,14 +77,14 @@ fn main() {
         let mut cindex = 0;
         let mut holder:Vec<Entry> = Vec::new();
 
-        while(!done)
-        {
+        while(!done) {
             if cindex == entries.len() {
                 done = true;
             } else {
                if entries[cindex].id != value{
                     done = true;
                 } else {
+                    holder.push(entries.pop_front());
                     value += 1;
                     cindex += 1;
                 }
@@ -92,7 +93,17 @@ fn main() {
 
         let newEnt = Entry::new(value,&args.arg_name,&status);
 
-        entries.push(newEnt);
+        entries.push_front(newEnt);
+
+        done = false;
+
+        while(!done) {
+            done = holder.len() == 0;
+
+            if(!done){
+                entries.push_front(holder.pop());
+            }
+        }
     }
 
     //if(args.cmd_remove)
@@ -107,7 +118,7 @@ fn main() {
             println!("{}",entry);
         }
     }
-    
+
     let encoded = json::encode(&entries).unwrap();
     
     if let Err(why) = file.write_all(encoded.as_bytes()) {
