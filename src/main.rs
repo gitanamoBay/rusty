@@ -5,7 +5,6 @@ extern crate docopt;
 extern crate rustc_serialize;
 
 use std::fs::File;
-use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -37,7 +36,7 @@ fn main() {
     let filepath = Path::new("rustynotes.txt");
 
     let mut file = if filepath.exists() {
-        match OpenOptions::new().read(true).open(filepath) {
+        match File::open(filepath) {
             Ok(file) => file,
             Err(why) => panic!("failed to open file {}",why)
         }
@@ -84,9 +83,9 @@ fn main() {
             }
         }
 
-        let new_ent = Entry::new(value,&args.arg_name,&status);
+        let new_ent = Entry::new(value, &args.arg_name, &status);
         
-        entries.insert(cindex,new_ent);
+        entries.insert(cindex, new_ent);
     }
 
     if args.cmd_remove || args.cmd_update {
@@ -94,7 +93,6 @@ fn main() {
                 Ok(n) => n,
                 Err(_) => panic!("error: second argument not an integer"),
             }; 
-
 
         match entries.binary_search_by(|probe| probe.id.cmp(&number)) {
             Ok(found) => {
@@ -110,7 +108,7 @@ fn main() {
 
     if args.cmd_list {
         for entry in entries.iter(){
-            println!("{}",entry);
+            println!("{}", entry);
         }
         return;
     }
@@ -119,7 +117,7 @@ fn main() {
     match File::create(filepath) {
         Ok(mut swap_file) => {
             if let Err(why) = swap_file.write_all(encoded.as_bytes()) {
-                panic!("errored on write:  {}",why);
+                panic!("errored on write: {}",why);
             }
         },
         Err(why) => panic!("failed to open file {}",why)
