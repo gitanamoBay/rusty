@@ -34,9 +34,7 @@ Options:
 fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
     
-    println!("{:#?}", args);
     let filepath = Path::new("rustynotes.txt");
-    let swp = Path::new("rn.swp");
 
     let mut file = if filepath.exists() {
         match OpenOptions::new().read(true).write(true).open(filepath) {
@@ -112,9 +110,8 @@ fn main() {
     
     let encoded = json::encode(&entries).unwrap();
     
-    match file.write_all(encoded.as_bytes()) {
-        Ok(_) => println!("worked."),
-        Err(why) => panic!("errored on write:  {}",why),
+    if let Err(why) = file.write_all(encoded.as_bytes()) {
+        panic!("errored on write:  {}",why);
     }
 }
 
