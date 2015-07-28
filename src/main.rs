@@ -28,6 +28,7 @@ Usage:
 
 Options:
     -h --help  Show this help message
+    ,arg_id: u32
 ");
 
 fn main() {
